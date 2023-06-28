@@ -8,45 +8,79 @@ const betSliderValue = document.querySelector(".js-slider-value");
 const betButton = document.querySelector(".js-bet-button");
 
 // program state
-let { deckId, playerCards, playerChips, computerChips, pot } =
-  getInitializeState();
+let {
+  deckId,
+  playerCards,
+  computerCards,
+  playerChips,
+  computerChips,
+  playerBetPlaced,
+  pot,
+} = getInitializeState();
 
 // initializations
 function getInitializeState() {
   return {
     deckId: null,
     playerCards: [],
+    computerCards: [],
     playerChips: 100,
     computerChips: 100,
+    playerBetPlaced: false,
     pot: 0,
   };
 }
 
 const initialize = () => {
-  ({ deckId, playerCards, playerChips, computerChips, pot } =
-    getInitializeState());
+  ({
+    deckId,
+    playerCards,
+    computerCards,
+    playerChips,
+    computerChips,
+    playerBetPlaced,
+    pot,
+  } = getInitializeState());
 };
 
-// state verification
+// state verification and change
 const canBet = () => {
-  return playerCards.length === 2 && playerChips > 0 && pot === 0;
+  return (
+    playerCards.length === 2 && playerChips > 0 && playerBetPlaced === false
+  );
 };
 
 const bet = () => {
   // add the bet's value to the pot
   // subtracts the bet's value from player's chips
+  // player bet placed
   // rerender
 
   const betValue = Number(betSlider.value);
   pot += betValue;
   playerChips -= betValue;
 
+  playerBetPlaced = true;
+
+  // rerender
+  render();
+
+  // computer move
+  computerMoveAfterBet();
+};
+
+const postBlinds = () => {
+  playerChips -= 1;
+  computerChips -= 2;
+  pot += 3;
+
   render();
 };
 
 //main functionality
-const startNewGame = async () => {
-  initialize();
+const startHand = async () => {
+  postBlinds();
+
   const response = await fetch(
     "https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1"
   );
@@ -56,14 +90,58 @@ const startNewGame = async () => {
   drawPlayersCards();
 };
 
+const startNewGame = () => {
+  initialize();
+  startHand();
+};
+
 const drawPlayersCards = async () => {
   if (deckId === null) return;
+
   const response = await fetch(
     `https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=2`
   );
+
   const data = await response.json();
   playerCards = data.cards;
+
   render();
+};
+
+const shouldComputerCall = () => {
+  if (computerCards.length !== 2) return false;
+  console.log(computerCards);
+  const card1Code = computerCards[0].code; // pl.: AC, 4H, 9D
+  const card2Code = computerCards[1].code; // pl.: 5C, 3D, 0H (10: 0)
+
+  const card1Value = card1Code[0];
+  const card2Value = card2Code[0];
+
+  const card1Suit = card1Code[1];
+  const card2Suit = card2Code[1];
+
+  console.log(card1Code, card2Code, card1Code[0], card2Code[0]);
+
+  return (
+    card1Value === card2Value ||
+    ["0", "J", "Q", "K", "A"].includes(card1Value) ||
+    ["0", "J", "Q", "K", "A"].includes(card2Value) ||
+    (card1Suit === card2Suit &&
+      Math.abs(Number(card1Value) - Number(card2Value)) <= 2)
+  );
+};
+
+const computerMoveAfterBet = async () => {
+  if (deckId === null) return;
+
+  const response = await fetch(
+    `https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=2`
+  );
+
+  const data = await response.json();
+  computerCards = data.cards;
+  alert(shouldComputerCall() ? "call" : "fold");
+  // render();
 };
 
 // Render functions

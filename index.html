@@ -9,10 +9,20 @@
   <body>
     <h1>Poker Client</h1>
     <button class="button-15 js-new-game" role="button">Új játék</button>
-    <div class="chip-count js-chip-count-container"></div>
     <div class="pot-count js-pot-count-container"></div>
 
-    <div class="user-cards js-user-cards"></div>
+    <div class="players-card">
+      <div>
+        <div class="chip-count js-player-chip-count-container"></div>
+        <div class="action"></div>
+        <div class="cards player-cards js-user-cards"></div>
+      </div>
+      <div>
+        <div class="chip-count js-computer-chip-count-container"></div>
+        <div class="action js-computer-action"></div>
+        <div class="cards computer-cards js-computer-cards"></div>
+      </div>
+    </div>
 
     <div class="bet-area js-bet-area invisible">
       <input
@@ -26,7 +36,6 @@
       <label for="bet-amount" class="slider-value js-slider-value"></label>
       <button class="button-15 bet-button js-bet-button">Bet</button>
     </div>
-
     <script src="app.js"></script>
   </body>
 </html>

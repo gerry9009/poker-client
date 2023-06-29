@@ -4,7 +4,7 @@ body {
 }
 
 .chip-count {
-  margin-top: 1rem;
+  margin: 1rem 0;
 }
 
 .bet-area {
@@ -18,19 +18,32 @@ body {
   font-size: 24px;
 }
 
-.user-cards {
+.players-card {
   background: forestgreen;
+  width: 100vw;
+  min-height: 400px;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 300px;
-  width: 600px;
-  margin-top: 1rem;
+  justify-content: space-around;
+  flex-wrap: wrap;
 }
 
-.user-cards img {
-  width: 30%;
-  height: 70%;
+.cards {
+  max-width: 500px;
+  min-width: 350px;
+  min-height: 400px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cards img {
+  max-height: 300px;
+  max-width: 200px;
+}
+
+.action {
+  height: 20px;
+  width: 200px;
 }
 
 .button-15 {

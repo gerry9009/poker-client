@@ -1,45 +1,58 @@
 const newGameButton = document.querySelector(".js-new-game");
-const userCardsContainer = document.querySelector(".js-user-cards");
-const chipCount = document.querySelector(".js-chip-count-container");
+
+const playerCardsContainer = document.querySelector(".js-user-cards");
+const playerChipCount = document.querySelector(
+  ".js-player-chip-count-container"
+);
+
 const potCount = document.querySelector(".js-pot-count-container");
 const betArea = document.querySelector(".js-bet-area");
 const betSlider = document.querySelector("#bet-amount");
 const betSliderValue = document.querySelector(".js-slider-value");
 const betButton = document.querySelector(".js-bet-button");
 
+const computerCardsContainer = document.querySelector(".js-computer-cards");
+const computerChipCount = document.querySelector(
+  ".js-computer-chip-count-container"
+);
+const computerActionContainer = document.querySelector(".js-computer-action");
+
 // program state
 let {
   deckId,
-  playerCards,
-  computerCards,
-  playerChips,
-  computerChips,
-  playerBetPlaced,
   pot,
+  playerCards, // user card
+  playerChips,
+  playerBetPlaced,
+  computerCards, // computer card
+  computerChips, //
+  computerAction, // computer action (call, fold)
 } = getInitializeState();
 
 // initializations
 function getInitializeState() {
   return {
     deckId: null,
-    playerCards: [],
-    computerCards: [],
-    playerChips: 100,
-    computerChips: 100,
-    playerBetPlaced: false,
     pot: 0,
+    playerCards: [],
+    playerChips: 100,
+    playerBetPlaced: false,
+    computerCards: [],
+    computerChips: 100,
+    computerAction: null, // computer action (call, fold)
   };
 }
 
 const initialize = () => {
   ({
     deckId,
-    playerCards,
-    computerCards,
-    playerChips,
-    computerChips,
-    playerBetPlaced,
     pot,
+    playerCards, // user card
+    playerChips,
+    playerBetPlaced,
+    computerCards, // computer card
+    computerChips, //
+    computerAction, // computer action (call, fold)
   } = getInitializeState());
 };
 
@@ -108,7 +121,7 @@ const drawPlayersCards = async () => {
   render();
 };
 
-const shouldComputerCall = () => {
+const shouldComputerCall = (computerCards) => {
   if (computerCards.length !== 2) return false;
   console.log(computerCards);
   const card1Code = computerCards[0].code; // pl.: AC, 4H, 9D
@@ -131,6 +144,7 @@ const shouldComputerCall = () => {
   );
 };
 
+//TODO: ------------------------------------------------------------------------
 const computerMoveAfterBet = async () => {
   if (deckId === null) return;
 
@@ -139,28 +153,44 @@ const computerMoveAfterBet = async () => {
   );
 
   const data = await response.json();
-  computerCards = data.cards;
-  alert(shouldComputerCall() ? "call" : "fold");
-  // render();
+
+  if (shouldComputerCall(data.cards)) {
+    computerAction = "Call";
+    computerCards = data.cards;
+  } else {
+    computerAction = "Fold";
+  }
+
+  render();
 };
 
 // Render functions
-const renderPlayerCards = () => {
-  userCardsContainer.innerHTML = "";
-  for (let card of playerCards) {
+const renderCardsInContainer = (cards, container) => {
+  container.innerHTML = "";
+  for (let card of cards) {
     const img = document.createElement("img");
     img.src = card.images.png;
     img.alt = card.code;
 
-    userCardsContainer.appendChild(img);
+    container.appendChild(img);
   }
 };
 
+const renderAllCards = () => {
+  renderCardsInContainer(playerCards, playerCardsContainer);
+  renderCardsInContainer(computerCards, computerCardsContainer);
+};
+
 const renderPlayerChips = () => {
-  chipCount.innerHTML = `
-  <div class="chip-count">Player : ${playerChips} $</div>
-  <divclass="chip-count" >Computer : ${computerChips} $</div>
+  playerChipCount.innerHTML = `
+  <div>Player : ${playerChips} $</div>
   `;
+};
+
+const renderComputerChips = () => {
+  computerChipCount.innerHTML = `
+    <div>Computer : ${computerChips} $</div>
+    `;
 };
 
 const renderPot = () => {
@@ -181,11 +211,18 @@ const renderBetSlider = () => {
   }
 };
 
+const renderActions = () => {
+  // if variable null or undefined -> after ??
+  computerActionContainer.innerHTML = computerAction ?? "";
+};
+
 const render = () => {
-  renderPlayerCards();
+  renderAllCards();
   renderPlayerChips();
+  renderComputerChips();
   renderPot();
   renderBetSlider();
+  renderActions();
 };
 
 // Event listeners

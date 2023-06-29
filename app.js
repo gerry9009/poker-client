@@ -1,15 +1,14 @@
 const newGameButton = document.querySelector(".js-new-game");
-
-const playerCardsContainer = document.querySelector(".js-user-cards");
-const playerChipCount = document.querySelector(
-  ".js-player-chip-count-container"
-);
-
 const potCount = document.querySelector(".js-pot-count-container");
 const betArea = document.querySelector(".js-bet-area");
 const betSlider = document.querySelector("#bet-amount");
 const betSliderValue = document.querySelector(".js-slider-value");
 const betButton = document.querySelector(".js-bet-button");
+
+const playerCardsContainer = document.querySelector(".js-user-cards");
+const playerChipCount = document.querySelector(
+  ".js-player-chip-count-container"
+);
 
 const computerCardsContainer = document.querySelector(".js-computer-cards");
 const computerChipCount = document.querySelector(
@@ -24,9 +23,11 @@ let {
   playerCards, // user card
   playerChips,
   playerBetPlaced,
+  playerBets,
   computerCards, // computer card
   computerChips, //
-  computerAction, // computer action (call, fold)
+  computerAction, // computer action (call, fold, check)
+  computerBets,
 } = getInitializeState();
 
 // initializations
@@ -37,9 +38,11 @@ function getInitializeState() {
     playerCards: [],
     playerChips: 100,
     playerBetPlaced: false,
+    playerBets: 0,
     computerCards: [],
     computerChips: 100,
     computerAction: null, // computer action (call, fold)
+    computerBets: 0,
   };
 }
 
@@ -50,9 +53,11 @@ const initialize = () => {
     playerCards, // user card
     playerChips,
     playerBetPlaced,
+    playerBets,
     computerCards, // computer card
     computerChips, //
     computerAction, // computer action (call, fold)
+    computerBets,
   } = getInitializeState());
 };
 
@@ -74,6 +79,7 @@ const bet = () => {
   playerChips -= betValue;
 
   playerBetPlaced = true;
+  playerBets += betValue;
 
   // rerender
   render();
@@ -84,7 +90,9 @@ const bet = () => {
 
 const postBlinds = () => {
   playerChips -= 1;
+  playerBets += 1;
   computerChips -= 2;
+  computerBets += 2;
   pot += 3;
 
   render();
@@ -154,9 +162,19 @@ const computerMoveAfterBet = async () => {
 
   const data = await response.json();
 
-  if (shouldComputerCall(data.cards)) {
+  if (pot === 4) {
+    computerAction = "Check";
+    computerCards = data.cards;
+  } else if (shouldComputerCall(data.cards)) {
     computerAction = "Call";
     computerCards = data.cards;
+    // player: Bet (blinds and player bet)
+    // computer: 2 (big blinds)
+    // till : Pot
+    const difference = playerBets - computerBets;
+    computerChips -= difference;
+    computerBets += difference;
+    pot += difference;
   } else {
     computerAction = "Fold";
   }

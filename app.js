@@ -4,6 +4,9 @@ const betArea = document.querySelector(".js-bet-area");
 const betSlider = document.querySelector("#bet-amount");
 const betSliderValue = document.querySelector(".js-slider-value");
 const betButton = document.querySelector(".js-bet-button");
+const communityCardsContainer = document.querySelector(
+  ".js-community-cards-container"
+);
 
 const playerCardsContainer = document.querySelector(".js-user-cards");
 const playerChipCount = document.querySelector(
@@ -28,6 +31,7 @@ let {
   computerChips, //
   computerAction, // computer action (Call, Fold, Check)
   computerBets,
+  communityCards,
 } = getInitializeState();
 
 // initializations
@@ -43,6 +47,7 @@ function getInitializeState() {
     computerChips: 100,
     computerAction: null, // computer action (call, fold)
     computerBets: 0,
+    communityCards: [],
   };
 }
 
@@ -58,6 +63,7 @@ const initialize = () => {
     computerChips, //
     computerAction, // computer action (call, fold)
     computerBets,
+    communityCards,
   } = getInitializeState());
 };
 
@@ -116,11 +122,21 @@ const startNewGame = () => {
   startHand();
 };
 
-const endHand = () => {
+const endHand = (winner = null) => {
   const handleEndHand = () => {
     // all case need handle
     if (computerAction === "Fold") {
       playerChips += pot;
+      pot = 0;
+    } else if (winner === "Player") {
+      playerChips += pot;
+      pot = 0;
+    } else if (winner === "Computer") {
+      computerChips += pot;
+      pot = 0;
+    } else if (winner === "Draw") {
+      playerChips += playerBets;
+      computerChips += computerBets;
       pot = 0;
     }
 
@@ -165,8 +181,6 @@ const shouldComputerCall = (computerCards) => {
   const card1Suit = card1Code[1];
   const card2Suit = card2Code[1];
 
-  console.log(card1Code, card2Code, card1Code[0], card2Code[0]);
-
   return (
     card1Value === card2Value ||
     ["0", "J", "Q", "K", "A"].includes(card1Value) ||
@@ -176,7 +190,50 @@ const shouldComputerCall = (computerCards) => {
   );
 };
 
+const SHOWDOWN_API_PREFIX = "https://api.pokerapi.dev/v1/winner/texas_holdem";
+const cardsToString = (cards) => {
+  return cards
+    .map((card) => card.code)
+    .toString()
+    .replaceAll("0", "10");
+};
+
+const getWinner = async () => {
+  const cc = cardsToString(communityCards);
+  const player = cardsToString(playerCards);
+  const computer = cardsToString(computerCards);
+
+  const response = await fetch(
+    `${SHOWDOWN_API_PREFIX}?cc=${cc}&pc[]=${player}&pc[]=${computer}`
+  );
+  const data = await response.json();
+  const winners = data.winners;
+
+  const winnersCardsString = winners[0].cards;
+  if (winnersCardsString === player) {
+    return "Player";
+  } else if (winnersCardsString === computer) {
+    return "Computer";
+  } else {
+    return "Draw";
+  }
+};
+
 //TODO: ------------------------------------------------------------------------
+const showdown = async () => {
+  const response = await fetch(
+    `https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=5`
+  );
+
+  const data = await response.json();
+  communityCards = data.cards;
+  render();
+
+  const winner = await getWinner();
+  console.log(winner);
+  return winner;
+};
+
 const computerMoveAfterBet = async () => {
   if (deckId === null) return;
 
@@ -188,10 +245,13 @@ const computerMoveAfterBet = async () => {
 
   if (pot === 4) {
     computerAction = "Check";
-    computerCards = data.cards;
   } else if (shouldComputerCall(data.cards)) {
     computerAction = "Call";
-    computerCards = data.cards;
+  } else {
+    computerAction = "Fold";
+  }
+
+  if (computerAction === "Call") {
     // player: Bet (blinds and player bet)
     // computer: 2 (big blinds)
     // till : Pot
@@ -199,13 +259,17 @@ const computerMoveAfterBet = async () => {
     computerChips -= difference;
     computerBets += difference;
     pot += difference;
-  } else {
-    computerAction = "Fold";
   }
 
-  render();
-
-  endHand();
+  if (computerAction === "Call" || computerAction === "Check") {
+    computerCards = data.cards;
+    render();
+    const winner = await showdown();
+    endHand(winner);
+  } else {
+    render();
+    endHand();
+  }
 };
 
 // Render functions
@@ -223,6 +287,7 @@ const renderCardsInContainer = (cards, container) => {
 const renderAllCards = () => {
   renderCardsInContainer(playerCards, playerCardsContainer);
   renderCardsInContainer(computerCards, computerCardsContainer);
+  renderCardsInContainer(communityCards, communityCardsContainer);
 };
 
 const renderPlayerChips = () => {

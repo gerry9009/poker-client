@@ -26,7 +26,7 @@ let {
   playerBets,
   computerCards, // computer card
   computerChips, //
-  computerAction, // computer action (call, fold, check)
+  computerAction, // computer action (Call, Fold, Check)
   computerBets,
 } = getInitializeState();
 
@@ -116,6 +116,30 @@ const startNewGame = () => {
   startHand();
 };
 
+const endHand = () => {
+  const handleEndHand = () => {
+    // all case need handle
+    if (computerAction === "Fold") {
+      playerChips += pot;
+      pot = 0;
+    }
+
+    playerBets = 0;
+    computerBets = 0;
+
+    playerCards = [];
+    computerCards = [];
+    computerAction = null;
+    playerBetPlaced = false;
+
+    deckId = null;
+
+    render();
+  };
+
+  setTimeout(handleEndHand, 2000);
+};
+
 const drawPlayersCards = async () => {
   if (deckId === null) return;
 
@@ -180,6 +204,8 @@ const computerMoveAfterBet = async () => {
   }
 
   render();
+
+  endHand();
 };
 
 // Render functions

@@ -133,16 +133,16 @@ const startNewGame = () => {
 const endHand = (winner = null) => {
   const handleEndHand = () => {
     // all case need handle
-    if (computerAction === "Fold") {
+    if (computerAction === ACTIONS.Fold) {
       playerChips += pot;
       pot = 0;
-    } else if (winner === "Player") {
+    } else if (winner === WINNER.Player) {
       playerChips += pot;
       pot = 0;
-    } else if (winner === "Computer") {
+    } else if (winner === WINNER.Computer) {
       computerChips += pot;
       pot = 0;
-    } else if (winner === "Draw") {
+    } else if (winner === WINNER.Draw) {
       playerChips += playerBets;
       computerChips += computerBets;
       pot = 0;
@@ -220,11 +220,11 @@ const getWinner = async () => {
 
   const winnersCardsString = winners[0].cards;
   if (winnersCardsString === player) {
-    return "Player";
+    return WINNER.Player;
   } else if (winnersCardsString === computer) {
-    return "Computer";
+    return WINNER.Computer;
   } else {
-    return "Draw";
+    return WINNER.Draw;
   }
 };
 
@@ -253,16 +253,16 @@ const computerMoveAfterBet = async () => {
   const data = await response.json();
 
   if (pot === 4) {
-    computerAction = "Check";
+    computerAction = ACTIONS.Check;
   } else if (shouldComputerCall(data.cards)) {
-    computerAction = "Call";
+    computerAction = ACTIONS.Call;
   } else {
-    computerAction = "Fold";
-    winner = "Player";
+    computerAction = ACTIONS.Fold;
+    winner = WINNER.Player;
     winnerHand = "Computer fold";
   }
 
-  if (computerAction === "Call") {
+  if (computerAction === ACTIONS.Call) {
     // player: Bet (blinds and player bet)
     // computer: 2 (big blinds)
     // till : Pot
@@ -272,7 +272,7 @@ const computerMoveAfterBet = async () => {
     pot += difference;
   }
 
-  if (computerAction === "Call" || computerAction === "Check") {
+  if (computerAction === ACTIONS.Call || computerAction === ACTIONS.Check) {
     computerCards = data.cards;
     winner = await showdown();
     endHand(winner);

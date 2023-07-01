@@ -4,8 +4,9 @@ const ACTIONS = {
   Check: "Check",
 };
 
-const WINNER = {
+const STATUS = {
   Player: "Player",
   Computer: "Computer",
   Draw: "Draw",
+  Fold: "Fold",
 };

@@ -57,6 +57,20 @@ function getInitializeState() {
   };
 }
 
+// Új leosztásnál ezeket az elemeket kell frissíteni
+// Mindent reset-elünk kivétel a zseton állást
+/*
+playerBets = 0;
+computerBets = 0;
+
+playerCards = [];
+computerCards = [];
+computerAction = null;
+playerBetPlaced = false;
+
+deckId = null;
+*/
+
 const initialize = () => {
   ({
     deckId,
@@ -138,28 +152,17 @@ const endHand = (winner = null) => {
     if (computerAction === ACTIONS.Fold) {
       playerChips += pot;
       pot = 0;
-    } else if (winner === WINNER.Player) {
+    } else if (winner === STATUS.Player) {
       playerChips += pot;
       pot = 0;
-    } else if (winner === WINNER.Computer) {
+    } else if (winner === STATUS.Computer) {
       computerChips += pot;
       pot = 0;
-    } else if (winner === WINNER.Draw) {
+    } else if (winner === STATUS.Draw) {
       playerChips += playerBets;
       computerChips += computerBets;
       pot = 0;
     }
-
-    playerBets = 0;
-    computerBets = 0;
-
-    playerCards = [];
-    computerCards = [];
-    computerAction = null;
-    playerBetPlaced = false;
-
-    deckId = null;
-
     render();
   };
 
@@ -220,11 +223,11 @@ const getWinner = async () => {
 
   const winnersCardsString = winners[0].cards;
   if (winnersCardsString === player) {
-    return WINNER.Player;
+    return STATUS.Player;
   } else if (winnersCardsString === computer) {
-    return WINNER.Computer;
+    return STATUS.Computer;
   } else {
-    return WINNER.Draw;
+    return STATUS.Draw;
   }
 };
 
@@ -258,7 +261,7 @@ const computerMoveAfterBet = async () => {
     computerAction = ACTIONS.Call;
   } else {
     computerAction = ACTIONS.Fold;
-    winner = WINNER.Player;
+    winner = STATUS.Player;
     winnerHand = "Computer fold";
   }
 

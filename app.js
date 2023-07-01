@@ -36,6 +36,7 @@ let {
   communityCards,
   winner,
   winnerHand,
+  timeoutIDs, // SetTimeout ids list
 } = getInitializeState();
 
 // initializations
@@ -54,6 +55,7 @@ function getInitializeState() {
     communityCards: [],
     winner: null,
     winnerHand: null,
+    timeoutIDs: [], // SetTimeout ids list
   };
 }
 
@@ -72,6 +74,9 @@ deckId = null;
 */
 
 const initialize = () => {
+  for (let id of timeoutIDs) {
+    clearTimeout(id);
+  }
   ({
     deckId,
     pot,
@@ -86,6 +91,7 @@ const initialize = () => {
     communityCards,
     winner,
     winnerHand,
+    timeoutIDs,
   } = getInitializeState());
   betSlider.value = 1;
 };
@@ -166,7 +172,8 @@ const endHand = (winner = null) => {
     render();
   };
 
-  setTimeout(handleEndHand, 2000);
+  const id = setTimeout(handleEndHand, 2000);
+  timeoutIDs.push(id);
 };
 
 const drawPlayersCards = async () => {

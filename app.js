@@ -73,6 +73,7 @@ const initialize = () => {
     winner,
     winnerHand,
   } = getInitializeState());
+  betSlider.value = 1;
 };
 
 // state verification and change
@@ -122,7 +123,8 @@ const startHand = async () => {
   const data = await response.json();
   const { deck_id } = data;
   deckId = deck_id;
-  drawPlayersCards();
+  await drawPlayersCards();
+  render();
 };
 
 const startNewGame = () => {
@@ -173,8 +175,6 @@ const drawPlayersCards = async () => {
 
   const data = await response.json();
   playerCards = data.cards;
-
-  render();
 };
 
 const shouldComputerCall = (computerCards) => {

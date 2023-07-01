@@ -7,37 +7,64 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <h1>Poker Client</h1>
-    <button class="button-15 js-new-game" role="button">Új játék</button>
-    <div class="pot-count js-pot-count-container"></div>
+    <h1>Poker Game</h1>
+    <button class="button-15 new-game-button js-new-game" role="button">
+      Új játék
+    </button>
 
-    <div class="players-card">
-      <div>
+    <div class="players-container">
+      <div class="player-container">
         <div class="chip-count js-player-chip-count-container"></div>
         <div class="action"></div>
         <div class="cards player-cards js-user-cards"></div>
+
+        <div class="bet-area js-bet-area invisible">
+          <div class="bet-area-slider">
+            <label
+              for="bet-amount"
+              class="slider-value js-slider-value"
+            ></label>
+            <input
+              type="range"
+              min="1"
+              max="100"
+              value="50"
+              class="bet-slider"
+              id="bet-amount"
+            />
+
+            <button class="button-15 js-bet-button">Bet</button>
+          </div>
+          <div class="bet-area-container">
+            <button class="bet-button js-bet-slider-button" data-value="10">
+              10%
+            </button>
+            <button class="bet-button js-bet-slider-button" data-value="25">
+              25%
+            </button>
+            <button class="bet-button js-bet-slider-button" data-value="50">
+              50%
+            </button>
+            <button class="bet-button js-bet-slider-button" data-value="75">
+              75%
+            </button>
+            <button class="bet-button js-bet-slider-button" data-value="100">
+              All-in
+            </button>
+          </div>
+        </div>
       </div>
-      <div>
+
+      <div class="player-container">
         <div class="chip-count js-computer-chip-count-container"></div>
         <div class="action js-computer-action"></div>
         <div class="cards computer-cards js-computer-cards"></div>
       </div>
     </div>
 
-    <div class="bet-area js-bet-area invisible">
-      <input
-        type="range"
-        min="1"
-        max="100"
-        value="50"
-        class="bet-slider"
-        id="bet-amount"
-      />
-      <label for="bet-amount" class="slider-value js-slider-value"></label>
-      <button class="button-15 bet-button js-bet-button">Bet</button>
-    </div>
-
-    <div class="js-community-cards-container"></div>
+    <div class="community-cards js-community-cards-container"></div>
+    <div class="pot-count js-pot-count-container"></div>
+    <div class="pot-count js-winner-container"></div>
     <script src="app.js"></script>
   </body>
 </html>

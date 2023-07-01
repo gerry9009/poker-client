@@ -4,9 +4,11 @@ const betArea = document.querySelector(".js-bet-area");
 const betSlider = document.querySelector("#bet-amount");
 const betSliderValue = document.querySelector(".js-slider-value");
 const betButton = document.querySelector(".js-bet-button");
+const betSliderButtons = document.querySelectorAll(".js-bet-slider-button");
 const communityCardsContainer = document.querySelector(
   ".js-community-cards-container"
 );
+const winnerContainer = document.querySelector(".js-winner-container");
 
 const playerCardsContainer = document.querySelector(".js-user-cards");
 const playerChipCount = document.querySelector(
@@ -32,6 +34,8 @@ let {
   computerAction, // computer action (Call, Fold, Check)
   computerBets,
   communityCards,
+  winner,
+  winnerHand,
 } = getInitializeState();
 
 // initializations
@@ -48,6 +52,8 @@ function getInitializeState() {
     computerAction: null, // computer action (call, fold)
     computerBets: 0,
     communityCards: [],
+    winner: null,
+    winnerHand: null,
   };
 }
 
@@ -64,6 +70,8 @@ const initialize = () => {
     computerAction, // computer action (call, fold)
     computerBets,
     communityCards,
+    winner,
+    winnerHand,
   } = getInitializeState());
 };
 
@@ -208,6 +216,7 @@ const getWinner = async () => {
   );
   const data = await response.json();
   const winners = data.winners;
+  winnerHand = winners[0].result.replaceAll("_", " ");
 
   const winnersCardsString = winners[0].cards;
   if (winnersCardsString === player) {
@@ -230,7 +239,7 @@ const showdown = async () => {
   render();
 
   const winner = await getWinner();
-  console.log(winner);
+
   return winner;
 };
 
@@ -249,6 +258,8 @@ const computerMoveAfterBet = async () => {
     computerAction = "Call";
   } else {
     computerAction = "Fold";
+    winner = "Player";
+    winnerHand = "Computer fold";
   }
 
   if (computerAction === "Call") {
@@ -263,9 +274,9 @@ const computerMoveAfterBet = async () => {
 
   if (computerAction === "Call" || computerAction === "Check") {
     computerCards = data.cards;
-    render();
-    const winner = await showdown();
+    winner = await showdown();
     endHand(winner);
+    render();
   } else {
     render();
     endHand();
@@ -325,6 +336,11 @@ const renderActions = () => {
   computerActionContainer.innerHTML = computerAction ?? "";
 };
 
+const renderWinner = () => {
+  winnerContainer.innerHTML =
+    winner === null ? "" : `${winner} won with ${winnerHand}`;
+};
+
 const render = () => {
   renderAllCards();
   renderPlayerChips();
@@ -332,12 +348,38 @@ const render = () => {
   renderPot();
   renderBetSlider();
   renderActions();
+  renderWinner();
 };
 
 // Event listeners
 newGameButton.addEventListener("click", startNewGame);
 
 betSlider.addEventListener("change", render);
+betSlider.addEventListener("input", render);
+
+const getPlayerPotBet = () => {
+  let difference = computerBets - playerBets;
+  return Math.min(playerChips, pot + 2 * difference);
+};
+
+const setSliderValue = (percentage) => {
+  let betSize = null;
+  if (typeof percentage === "number") {
+    betSize = Math.floor((playerChips * percentage) / 100);
+  } else {
+    betSize = getPlayerPotBet();
+  }
+
+  betSlider.value = betSize;
+  render();
+};
+
+betSliderButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const raiseBtnValue = Number(btn.dataset.value);
+    setSliderValue(raiseBtnValue);
+  });
+});
 
 betButton.addEventListener("click", bet);
 
